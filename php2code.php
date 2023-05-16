@@ -8,10 +8,10 @@ Email:          dasodi@gmail.com
 Fecha:          16-05-2023
 */
 
-//establece el uso horario
+//time zone
 date_default_timezone_set('Europe/Madrid');
 
-//inicializa valores
+//ini params script
 $b_imprimir=true;
 $informe='';
 
