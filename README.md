@@ -1,8 +1,12 @@
 # php2code
 Autor:          Dario Soto Diaz
+
 Version:        1.0
+
 Email:          dasodi@gmail.com
+
 Fecha:          16-05-2023
+
 Descripcion:    Pasa codigo de multiples archivos php y otros a un solo archivo de texto de codigo fuente.
 
 1. Es necesario configurar el archivo ini.php con los parametros adecuados.
