@@ -4,7 +4,8 @@ Aplicacion:     php2code - utils
 Autor:          Dario Soto Diaz
 Version:        1.0
 Descripcion:    pasa el codigo de una aplicacion web a un archivo texto para su registro
-Fecha Mod.:     10-05-2023
+Email:          dasodi@gmail.com
+Fecha:          16-05-2023
 */
 
 //establece el uso horario
@@ -12,9 +13,7 @@ date_default_timezone_set('Europe/Madrid');
 
 //inicializa valores
 $b_imprimir=true;
-$m_error='';
 $informe='';
-define('CONF_MODO_LOCAL',true);
 
 //================================== configuracion ============================================
 
@@ -63,18 +62,18 @@ $no_files = $conf['App']['no_files'];
 //================================== fin configuracion ========================================
 
 //obtiene nombre de la aplicacion en archivo ini de la app a codificar
-$app_file = $dir_app . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'conn.php';
-if(file_exists($app_file)){
-    $conn = parse_ini_file($app_file,true);
-    if(!is_array($conn)){
-        die("El archivo $app_file no es valido");
+$ini_app_file = $conf['App']['ini_app_file'];
+if(file_exists($ini_app_file)){
+    $ini_app = parse_ini_file($ini_app_file,true);
+    if(!is_array($ini_app)){
+        die("El archivo $ini_app_file no es valido");
     }
 }else{
-    die("No existe archivo $app_file");
+    die("No existe archivo $ini_app_file");
 }
-$app_name = $conn['App']['name'];
-$app_author = $conn['App']['autor'];
-$app_version = $conn['App']['version'];
+$app_name = $ini_app['App']['name'];
+$app_author = $ini_app['App']['autor'];
+$app_version = $ini_app['App']['version'];
 
 //-------------- define variables globales -------------------------
 
@@ -91,7 +90,7 @@ $global_md5 = '';
 
 //guarda la relacion de los archivos agregados al codigo fuente
 $global_arr = array();
-$global_arr[] = 'file,'."\t".'datetime,'."\t".'size,'."\t".'md5';
+$global_arr[] = 'file,'."\t".'datetime,'."\t".'size,'."\t".'hash-md5';
 
 //crea nombre que va a tener el archivo de lcodigo fuente
 $code_file = $dir_code . DIRECTORY_SEPARATOR. strtolower($app_name) .'-code_' . date('YmdHi') . '.txt';
@@ -103,8 +102,8 @@ if(file_exists($code_file)){
 $fp = fopen($code_file, 'a');
 fwrite($fp, "========================================================================================" . "\n");
 fwrite($fp, 'Nombre Aplicacion:' . "\t" . "\t" . $app_name . "\n");
-fwrite($fp, 'Nombre Autor:' . "\t" . "\t" . "\t" . $app_author . "\n");
 fwrite($fp, 'Version:' . "\t" . "\t" . "\t" . "\t" . $app_version . "\n");
+fwrite($fp, 'Nombre Autor:' . "\t" . "\t" . "\t" . $app_author . "\n");
 fwrite($fp, 'Carpeta Aplicacion:' . "\t" . "\t" . $dir_app . "\n");
 fwrite($fp, 'Extensiones a codigo:' . "\t" . $extensions . "\n");
 fwrite($fp, 'Carpetas Excluidas : ' . "\t" . implode(', ', $global_no_dirs) . "\n");
@@ -116,7 +115,7 @@ fclose($fp);
 // recorre las carpetas y subcarpetas y crea archivo de codigo fuente de la aplicacion
 get_folder_scripts($dir_app,$extensions);
 
-//inicia informe
+//inicia y muestra informe
 p_Imprimir($b_imprimir,'',$informe,2);
 p_Imprimir($b_imprimir,'**************************************************************************************************',$informe);
 p_Imprimir($b_imprimir,'Ejecutando script: '.$script_name.' --- Inicio script: '.date('Y-m-d H:i:s'),$informe);
@@ -159,30 +158,10 @@ exit();
 
 //------------------------ FUNCIONES DE LA PAGINA --------------------------------------------------
 
-//obtiene configuracion de la app desde base de datos
-function p_getConfig($host, $database, $user, $pass, &$error = ''){
-    $conn = mysqli_connect($host, $user, $pass, $database);
-    if(!$conn){
-        echo "Error: No se pudo conectar a MySQL." . PHP_EOL . mysqli_connect_error();
-        exit();
-    }
-    $sql = sprintf("SELECT * FROM sys_config ORDER BY IdConfiguracion DESC LIMIT 1");
-    $query_id = mysqli_query($conn,$sql);
-    if(!$query_id){
-        $error = "Error query: " . PHP_EOL . mysqli_error($conn);
-        return false;
-    }
-    $conf = mysqli_fetch_array($query_id);
-    
-    mysqli_close($conn);
-    
-    return $conf;
-}
-
-function p_Imprimir($imprimir,$txt,&$txt_msg='',$num_rc=0,$a_navegador=false){
+function p_Imprimir($imprimir,$txt,&$txt_msg='',$num_rc=0,$a_navegador=true){
     if(!$imprimir) return;
 
-    if($a_navegador || CONF_MODO_LOCAL){
+    if($a_navegador){
         if($num_rc > 0){
             for($i=0;$i<$num_rc;$i++){
                 echo '<br>';
